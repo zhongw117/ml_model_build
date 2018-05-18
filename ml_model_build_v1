@@ -1,0 +1,151 @@
+
+# coding: utf-8
+
+# In[1]:
+
+
+# -*-coding:utf8-*-
+import pandas as pd
+import sklearn, time
+import numpy as np
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+from wilson_modules import MLmodel
+
+
+# In[2]:
+
+
+# df = pd.read_csv('/home/wilson/Desktop/databases/db_labelled.csv')
+df = pd.read_csv('/home/wilson/Desktop/databases/db_labelled.csv')
+df.drop(['user_nickname','content','signature'],axis=1,inplace=True)
+df.shape
+
+
+# In[3]:
+
+
+# handling NaN data in the database
+np.isnan(df['LABEL']).any()
+
+
+# In[4]:
+
+
+# df[df['LABEL'].isnull()]
+
+
+# In[5]:
+
+
+# df.dropna(subset=['LABEL'],inplace=True)
+
+
+# In[6]:
+
+
+df_y = df['LABEL']
+# check the correlation between x and y
+corr_matrix = df.corr()
+corr_matrix['LABEL'].sort_values(ascending=False)
+
+
+# In[7]:
+
+
+# # plot the relationships
+# import matplotlib.pyplot as plt
+# %matplotlib inline
+# df.hist(bins=20, figsize=(16,12))
+# plt.show()
+
+
+# In[8]:
+
+
+# df['count_dg'].where(df['count_dg']<15, inplace=True)
+# df['count_dg'].hist(bins=20, figsize=(20,10))
+# plt.show()
+
+
+# In[9]:
+
+
+# corr_matrix = df.corr()
+# corr_matrix['LABEL'].sort_values(ascending=False)
+
+
+# In[10]:
+
+
+# df['num_words'].where(df['num_words']<20, inplace=True)
+# # df['count_dg'].hist(bins=20, figsize=(20,10))
+# # plt.show()
+# corr_matrix = df.corr()
+# corr_matrix['LABEL'].sort_values(ascending=False)
+
+
+# In[11]:
+
+
+train_set, test_set = train_test_split(df, test_size=0.2, random_state=42)
+
+
+# In[12]:
+
+
+x_train = train_set.drop(['count_dg','count_zh','LABEL'],axis=1)
+y_train = train_set['LABEL'].copy()
+# x_train.describe()
+
+
+# In[13]:
+
+
+x_test = test_set.drop(['count_dg','count_zh','LABEL'],axis=1)
+y_test = test_set['LABEL'].copy()
+
+
+# In[14]:
+
+
+model_sel = MLmodel.model_select(x_train,y_train)
+
+
+# In[15]:
+
+
+model = model_sel.knn()
+
+
+# In[16]:
+
+
+predict= model.predict(x_test)
+precision = metrics.precision_score(y_test, predict)
+recall = metrics.recall_score(y_test, predict)
+accuracy = metrics.accuracy_score(y_test, predict)
+
+
+# In[17]:
+
+
+print(precision)
+
+
+# In[18]:
+
+
+from wilson_modules import model_estimator
+
+
+# In[19]:
+
+
+model_e = model_estimator.model_est(x_train, y_train, model)
+
+
+# In[20]:
+
+
+result = model_e.model_estimator()
